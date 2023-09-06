@@ -1,0 +1,74 @@
+---
+title: "Problem Set 1"
+output: html_notebook
+---
+
+# 1. Load the "mtcars" dataset from the base R package. Load the dataset data(mtcars)
+
+```{r}
+data("mtcars")
+```
+
+
+# (a) Fit a linear regression model to predict miles per gallon (mpg) using the variable horsepower (hp). Plot the linear regression line and data.
+```{r}
+# Fit the model
+model_a <- lm(mpg ~ hp, data=mtcars)
+
+# Plot the data and the regression line
+plot(mtcars$hp, mtcars$mpg, main="Regression of mpg on hp", 
+     xlab="Horsepower (hp)", ylab="Miles per Gallon (mpg)", pch=16)
+
+# Adds the regression line to the plot
+abline(model_a, col="red")  
+```
+
+
+# (b) What is the R2 of this regression?
+```{r}
+summary(model_a)$r.squared
+
+#The R2 of this regression is 0.602
+```
+
+
+# (c) Does the data appear linear?
+```{r}
+
+# Calculate residuals and predicted values
+residuals <- model_a$residuals
+fitted_values <- model_a$fitted.values
+
+# Plot residuals vs. fitted values
+plot(fitted_values, residuals, main="Residuals vs. Fitted Values",
+     xlab="Fitted Values", ylab="Residuals", pch=16)
+
+# Adds a horizontal line at zero
+abline(h=0, col="red")  
+
+#Based On the plot below shows, the data appear to be linear. Through the common method of plotting the residuals versus the predicted values (or the independent variable). It seen as the  residuals to be randomly scattered around zero without any clear pattern, thus the relationship is approximately linear.
+
+```
+
+
+# (d) Suggest an transformation of the hp variable to improve the model R2. Re-estimate your model.
+```{r}
+mtcars$log_hp <- log(mtcars$hp)
+model_log <- lm(mpg ~ log_hp, data=mtcars)
+
+# Check the new R²
+summary(model_log)$r.squared
+
+#Use 
+
+model_poly <- lm(mpg ~ hp + I(hp^2), data=mtcars)
+
+# Check the new R²
+summary(model_poly)$r.squared
+
+#
+
+
+```
+
+
