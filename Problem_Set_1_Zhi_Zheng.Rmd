@@ -1,5 +1,6 @@
 ---
 title: "Problem Set 1"
+author: "Zhi Zheng"
 output: html_notebook
 ---
 
@@ -66,7 +67,109 @@ model_poly <- lm(mpg ~ hp + I(hp^2), data=mtcars)
 # Check the new R²
 summary(model_poly)$r.squared
 
-#
+# Based on the increase in R^2 value when using the log transformation of horsepower, it suggests that the log transformation of hp indeed improved the model fit to the data. The R² value increased from 72.04% to 75.61%, which indicates that the log-transformed model explains more of the variability in mpg than the original model.
+
+# In conclusion, while the log transformation improved the R², it's essential to consider other diagnostic plots and tests to ensure that the assumptions of linear regression are met.
+
+```
+
+2. Sketch the training and test error as a function of model complexity.
+```{r}
+# Create a sequence of model complexities (e.g., number of features, polynomial degree, etc.)
+complexities <- seq(1, 100, by=1)
+
+# Generate hypothetical training and test error data based on the general trend
+train_error <- 1 / (1 + exp(0.1 * (complexities - 50)))
+test_error <- train_error + (complexities - 50)^2 / 2500
+
+# Plot the errors
+plot(complexities, train_error, type="l", col="blue", ylim=c(0,1), 
+     ylab="Error", xlab="Model Complexity", main="Training vs. Test Error")
+lines(complexities, test_error, col="red")
+legend("topright", legend=c("Training Error", "Test Error"), fill=c("blue", "red"))
+
+# The blue line represents training error.
+# The red line represents test error.
+# The plot shows that as model complexity increases, training error generally decreases. Meanwhile, test error decreases at first but then starts to increase, indicating overfitting.
+
+# Keep in mind that this is a hypothetical representation to demonstrate the concept. In real-world scenarios, the exact shape and behavior of these curves would depend on the specific data and models used.
+```
+
+3. Consider the "iris" dataset, which contains measurements of sepal length, sepal width, petal length, andpetal width for three different species of iris flowers. The data can be loaded with
+
+# Load the dataset
+data(iris)
+
+(a) Load the "iris" dataset in R and perform a brief exploratory data analysis (EDA) to explore the variables sepal length, sepal width, petal length, petal width and species.
+```{r}
+
+# Load the "iris" dataset
+data(iris)
+
+# EDA
+summary(iris)
+pairs(iris[, 1:4], main="Scatterplot Matrix", pch=21, bg=c("red", "green", "blue")[unclass(iris$Species)])
+boxplot(iris[,1:4], main="Boxplots of Measurements")
+
+
+```
+
+
+(b) Split the dataset into a training set (70%) and a test set (30%).
+```{r}
+# Setting a seed for reproducibility
+set.seed(123)
+# Splitting the dataset into 70% train and 30% test.
+train_indices <- sample(1:nrow(iris), nrow(iris)*0.7)
+train_set <- iris[train_indices, ]
+test_set <- iris[-train_indices, ]
+
+```
+
+(c) Implement the KNN algorithm with k = 3, 5 and 7 to classify the iris species based on the given predictor variables. Use the training set for training the model.
+```{r}
+# Load the 'class' library
+library(class)
+
+# Predict species with k = 3
+k3_pred <- knn(train=train_set[,1:4], test=test_set[,1:4], cl=train_set$Species, k=3)
+
+# Predict species with k = 5
+k5_pred <- knn(train=train_set[,1:4], test=test_set[,1:4], cl=train_set$Species, k=5)
+
+# Predict species with k = 7
+k7_pred <- knn(train=train_set[,1:4], test=test_set[,1:4], cl=train_set$Species, k=7)
+
+
+```
+
+
+(d) Choose an appropriate value of k (out of 3, 5 and 7) using cross-validation on the training set.
+```{r}
+# Using caret for cross-validation
+library(caret)
+library(ggplot2)
+
+# Define training control
+train_control <- trainControl(method="cv", number=10)  # 10-fold CV
+
+# Training model with train function (it will try different values of k)
+model <- train(Species ~ ., data=train_set, method="knn", trControl=train_control, tuneGrid=data.frame(k=c(3,5,7)))
+
+# Best k
+best_k <- model$bestTune$k
+
+```
+
+
+(e) Apply the trained model to predict the species of the flowers in the test set. How many observations in the test dataset are misclassified? What percentage are correctly classified?
+```{r}
+# Using the best k for prediction
+final_pred <- knn(train=train_set[,1:4], test=test_set[,1:4], cl=train_set$Species, k=best_k)
+
+# Misclassified observations
+misclassified <- sum(final_pred != test_set$Species)
+correctly_classified_percentage <- (nrow(test_set) - misclassified) / nrow(test_set) * 100
 
 
 ```
