@@ -10,8 +10,8 @@ output: html_notebook
 data("mtcars")
 ```
 
-
 # (a) Fit a linear regression model to predict miles per gallon (mpg) using the variable horsepower (hp). Plot the linear regression line and data.
+
 ```{r}
 # Fit the model
 model_a <- lm(mpg ~ hp, data=mtcars)
@@ -24,16 +24,16 @@ plot(mtcars$hp, mtcars$mpg, main="Regression of mpg on hp",
 abline(model_a, col="red")  
 ```
 
-
 # (b) What is the R2 of this regression?
+
 ```{r}
 summary(model_a)$r.squared
 
 #The R2 of this regression is 0.602
 ```
 
-
 # (c) Does the data appear linear?
+
 ```{r}
 
 # Calculate residuals and predicted values
@@ -51,8 +51,8 @@ abline(h=0, col="red")
 
 ```
 
-
 # (d) Suggest an transformation of the hp variable to improve the model R2. Re-estimate your model.
+
 ```{r}
 mtcars$log_hp <- log(mtcars$hp)
 model_log <- lm(mpg ~ log_hp, data=mtcars)
@@ -73,7 +73,8 @@ summary(model_poly)$r.squared
 
 ```
 
-2. Sketch the training and test error as a function of model complexity.
+2.  Sketch the training and test error as a function of model complexity.
+
 ```{r}
 # Create a sequence of model complexities (e.g., number of features, polynomial degree, etc.)
 complexities <- seq(1, 100, by=1)
@@ -95,12 +96,14 @@ legend("topright", legend=c("Training Error", "Test Error"), fill=c("blue", "red
 # Keep in mind that this is a hypothetical representation to demonstrate the concept. In real-world scenarios, the exact shape and behavior of these curves would depend on the specific data and models used.
 ```
 
-3. Consider the "iris" dataset, which contains measurements of sepal length, sepal width, petal length, andpetal width for three different species of iris flowers. The data can be loaded with
+3.  Consider the "iris" dataset, which contains measurements of sepal length, sepal width, petal length, andpetal width for three different species of iris flowers. The data can be loaded with
 
 # Load the dataset
+
 data(iris)
 
 (a) Load the "iris" dataset in R and perform a brief exploratory data analysis (EDA) to explore the variables sepal length, sepal width, petal length, petal width and species.
+
 ```{r}
 
 # Load the "iris" dataset
@@ -114,8 +117,8 @@ boxplot(iris[,1:4], main="Boxplots of Measurements")
 
 ```
 
-
 (b) Split the dataset into a training set (70%) and a test set (30%).
+
 ```{r}
 # Setting a seed for reproducibility
 set.seed(123)
@@ -127,6 +130,7 @@ test_set <- iris[-train_indices, ]
 ```
 
 (c) Implement the KNN algorithm with k = 3, 5 and 7 to classify the iris species based on the given predictor variables. Use the training set for training the model.
+
 ```{r}
 # Load the 'class' library
 library(class)
@@ -140,15 +144,19 @@ k5_pred <- knn(train=train_set[,1:4], test=test_set[,1:4], cl=train_set$Species,
 # Predict species with k = 7
 k7_pred <- knn(train=train_set[,1:4], test=test_set[,1:4], cl=train_set$Species, k=7)
 
+k3_pred
+k5_pred
+k7_pred
 
 ```
 
-
 (d) Choose an appropriate value of k (out of 3, 5 and 7) using cross-validation on the training set.
+
 ```{r}
 # Using caret for cross-validation
-library(caret)
 library(ggplot2)
+library(caret)
+library(lattice)
 
 # Define training control
 train_control <- trainControl(method="cv", number=10)  # 10-fold CV
@@ -161,8 +169,8 @@ best_k <- model$bestTune$k
 
 ```
 
-
 (e) Apply the trained model to predict the species of the flowers in the test set. How many observations in the test dataset are misclassified? What percentage are correctly classified?
+
 ```{r}
 # Using the best k for prediction
 final_pred <- knn(train=train_set[,1:4], test=test_set[,1:4], cl=train_set$Species, k=best_k)
@@ -171,7 +179,121 @@ final_pred <- knn(train=train_set[,1:4], test=test_set[,1:4], cl=train_set$Speci
 misclassified <- sum(final_pred != test_set$Species)
 correctly_classified_percentage <- (nrow(test_set) - misclassified) / nrow(test_set) * 100
 
+final_pred
+misclassified
+correctly_classified_percentage
+
+# 1 observation from the test dataset was misclassified.
+# The KNN model correctly classified approximately 97.78% of the observations in the test set.
 
 ```
 
+4.  Suppose you run KNN classification with majority voting and four possible classes (class A, B, C, and D). You wish to classify a new observation \( x_{\text{new}} \). You find that the three nearest neighbors to \( x_{\text{new}} \) are in class B. What is the KNN prediction for the class of \( x_{\text{new}} \)
+ when:
+ 
+(a) k = 3?
+(b) k = 5?
+(c) k = 7? 
+
+Answer "Not possible to determine from the information available" if the answer cannot be determined from available information about the data.
+
+Solution:
+
+The three nearest neighbors to \( x_{\text{new}} \) are all in class B.
+
+(a) 3 k=3:
+
+When k=3, you are considering only 3 nearest neighbors to decide the class of $x_{\text{new}}$. Since all three of these neighbors are from class B, the KNN prediction for $x_{\text{new}}$ will be class B.
+
+(b) k=5:
+
+For k=5, you need information about 5 nearest neighbors to make a prediction. However, we only know about the three nearest neighbors, which are all from class B. Without information on the other 2 neighbors, it's not possible to confidently predict the class for $x_{\text{new}}$.
+
+Answer: Not possible to determine from the information available.
+
+(c) k=7:
+
+Similarly, for k=7, information on 7 neighbors is required to make a prediction. We only know about the three closest neighbors. Without information on the remaining 4 neighbors, we cannot make a decision.
+
+Answer: Not possible to determine from the information available.
+
+```{r}
+
+```
+
+5. This question will use the mtcars dataset to estimate a ridge model in two ways. The response variable (y) is horsepower (hp). The features are mpg, disp, cyl, and wt. Standardize both X and y variables. 
+
+```{r}
+data(mtcars)
+
+# Features and response
+X <- as.matrix(mtcars[, c("mpg", "disp", "cyl", "wt")])
+y <- mtcars$hp
+
+# Standardize
+standardize <- function(x) {(x - mean(x)) / sd(x)}
+X <- apply(X, 2, standardize)
+y <- standardize(y)
+
+```
+
+
+(a) Estimate the ridge coefficients by writing an optimization program that minimizes the lagrangian formulation of the ridge problem. Assume λ = .5.
+
+```{r}
+library(stats)
+
+# Ridge optimization function
+ridge_obj <- function(beta, X, y, lambda) {
+  return(sum((y - X %*% beta)^2) + lambda * sum(beta^2))
+}
+
+# Optimization
+lambda <- 0.5
+result <- optim(par=rep(0, ncol(X)), fn=ridge_obj, X=X, y=y, lambda=lambda)
+ridge_a <- result$par
+
+```
+
+
+(b) Estimate the ridge coefficients by using the matrix formula. Assume λ = .5. Confirm that your estimates equal those from part a.
+
+The ridge coefficients can be determined using the formula:
+\[
+\beta = (X^T X + \lambda I)^{-1} X^T y
+\]
+
+
+```{r}
+
+ridge_b <- solve(t(X) %*% X + lambda * diag(ncol(X))) %*% t(X) %*% y
+
+#Check if the estimates are similar:
+
+all.equal(ridge_a, ridge_b)
+
+
+```
+
+
+(c) Calculate OLS coefficients for this model. How do they compare to your ridge estimates?
+
+```{r}
+ols_model <- lm(y ~ X)
+
+# remove intercept, since data was standardized
+ols_a <- coef(ols_model)[-1] 
+ols_a
+```
+
+
+(d) Calculate ridge coefficients when λ = 10. How do they compare with OLS and ridge estimates when λ = .5?
+
+```{r}
+lambda2 <- 10
+ridge_lambda_10 <- solve(t(X) %*% X + lambda2 * diag(ncol(X))) %*% t(X) %*% y
+
+ridge_lambda_10
+
+```
 
